@@ -6,6 +6,7 @@ import {
   Infinity,
   Menu,
   PersonStanding,
+  Spade,
   Worm,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -30,7 +31,7 @@ export function Sidebar() {
         <Menu />
       </button>
       {showSidebar && (
-        <header className="max-w-[200px] w-full flex-1 py-14 px-4 flex flex-col items-center bg-blue-100 fixed md:relative z-10 left-0 top-0 h-screen">
+        <header className="max-w-[200px] w-full flex-1 py-14 px-4 flex flex-col items-center bg-blue-100 fixed md:sticky z-10 left-0 top-0 h-screen">
           <Gamepad2 className="text-pink text-3xl w-10 h-10" />
           <nav className="flex flex-col mt-6 gap-3">
             <Link to="/" className="flex gap-1 items-center">
@@ -44,6 +45,10 @@ export function Sidebar() {
             <Link to={routes.hangman} className="flex gap-1 items-center">
               <PersonStanding className="text-pink text-sm w-4 h-4" />
               Hangman
+            </Link>
+            <Link to={routes.truco} className="flex gap-1 items-center">
+              <Spade className="text-pink text-sm w-4 h-4" />
+              Truco
             </Link>
             <Link to={routes.trivia} className="flex gap-1 items-center">
               <CircleCheck className="text-pink text-sm w-4 h-4" />
