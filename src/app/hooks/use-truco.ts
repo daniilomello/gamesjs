@@ -8,11 +8,13 @@ import {
 import {
   callTruco,
   canCallTruco,
+  canFold,
   canPlayFaceDown,
   createGame,
   dealHand,
   decideHand,
   finishRound,
+  foldHand,
   playCard,
   respondTruco,
   startHand,
@@ -84,6 +86,28 @@ function getAutomaticStep(
 export function useTruco() {
   const [state, setState] = useState<TrucoState | null>(null);
   const [faceDown, setFaceDown] = useState(false);
+  const [peekPartner, setPeekPartner] = useState(false);
+
+  // Hack: "P" shows or hides the partner's cards.
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.ctrlKey || event.metaKey || event.altKey || event.repeat)
+        return;
+      if (event.key.toLowerCase() !== 'p') return;
+
+      const target = event.target as HTMLElement | null;
+      if (
+        target?.closest('input, textarea, select, [contenteditable="true"]')
+      ) {
+        return;
+      }
+
+      setPeekPartner((prev) => !prev);
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   useEffect(() => {
     if (!state) return undefined;
@@ -119,6 +143,10 @@ export function useTruco() {
     if (state) setState(callTruco(state, HUMAN_SEAT));
   }
 
+  function onFold() {
+    if (state) setState(foldHand(state, HUMAN_SEAT));
+  }
+
   function onRespond(response: TrucoResponse) {
     if (state) setState(respondTruco(state, response, HUMAN_SEAT));
   }
@@ -132,14 +160,17 @@ export function useTruco() {
   return {
     state,
     faceDown: faceDown && !!state && isHumanTurn && canPlayFaceDown(state),
+    peekPartner: peekPartner && state?.players === 4,
     isHumanTurn,
     canCallTruco: !!state && canCallTruco(state, HUMAN_SEAT),
+    canFold: !!state && canFold(state, HUMAN_SEAT),
     canPlayFaceDown: !!state && isHumanTurn && canPlayFaceDown(state),
     startGame,
     restartGame,
     quitGame,
     onPlayCard,
     onCallTruco,
+    onFold,
     onRespond,
     onDecide,
     onToggleFaceDown: () => setFaceDown((prev) => !prev),

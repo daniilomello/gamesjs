@@ -37,7 +37,7 @@ export function TrucoSetup({ onStart }: TrucoSetupProps) {
     >
       <section>
         <h2 className="mb-3 text-lg font-bold text-white">Modalidade</h2>
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2">
           {TRUCO_VARIANT_LIST.map((variant) => {
             const selected = variant.id === variantId;
 

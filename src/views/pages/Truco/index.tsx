@@ -1,8 +1,13 @@
-import { ArrowLeft, EyeOff, Megaphone, Spade } from 'lucide-react';
+import { ArrowLeft, EyeOff, Flag, Megaphone, Spade } from 'lucide-react';
 import { motion } from 'motion/react';
 
 import { ANIMATIONS } from '@app/constants';
-import { isBlindHand, isManilha, stakeCall } from '@app/helpers/truco-logic';
+import {
+  getHandValue,
+  isBlindHand,
+  isManilha,
+  stakeCall,
+} from '@app/helpers/truco-logic';
 import { cardName } from '@app/helpers/truco-seats';
 import { TRUCO_VARIANTS } from '@app/helpers/truco-variants';
 import { HUMAN_SEAT, useTruco } from '@app/hooks/use-truco';
@@ -19,14 +24,17 @@ export function Truco() {
   const {
     state,
     faceDown,
+    peekPartner,
     isHumanTurn,
     canCallTruco,
+    canFold,
     canPlayFaceDown,
     startGame,
     restartGame,
     quitGame,
     onPlayCard,
     onCallTruco,
+    onFold,
     onRespond,
     onDecide,
     onToggleFaceDown,
@@ -70,7 +78,7 @@ export function Truco() {
               </div>
 
               <TrucoScoreBoard state={state} />
-              <TrucoTable state={state} />
+              <TrucoTable state={state} peekPartner={peekPartner} />
               <TrucoPrompt
                 state={state}
                 onRespond={onRespond}
@@ -117,6 +125,15 @@ export function Truco() {
                 >
                   <EyeOff className="h-4 w-4" />
                   Jogar coberta
+                </button>
+                <button
+                  type="button"
+                  onClick={onFold}
+                  disabled={!canFold}
+                  className="flex items-center gap-2 rounded-lg border-2 border-gray-200 px-5 py-2 font-semibold text-white transition-colors hover:border-pink disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Flag className="h-4 w-4" />
+                  Correr (+{getHandValue(state)} para eles)
                 </button>
               </div>
 

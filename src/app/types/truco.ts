@@ -20,7 +20,7 @@ export type TrucoCard = {
 
 export type TrucoTeam = 0 | 1;
 
-export type TrucoVariantId = 'paulista' | 'mineiro' | 'limpo';
+export type TrucoVariantId = 'paulista' | 'mineiro';
 
 export type TrucoPlayerCount = 2 | 4;
 
@@ -30,6 +30,8 @@ export type TrucoVariant = {
   tagline: string;
   /** Ranks in the deck, weakest first. */
   ranks: TrucoRank[];
+  /** Cards kept in the deck even though their rank was taken out (the fixed manilhas). */
+  extraCards?: TrucoCard[];
   /** `vira`: the manilha is the rank after the turned card. `fixed`: always the same four cards. */
   manilha: 'vira' | 'fixed';
   /** Hand value at each betting level (no bet, truco, seis, nove, doze). */

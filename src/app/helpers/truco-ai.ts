@@ -11,6 +11,7 @@ import {
   canRaisePending,
   cardStrength,
   isBlindHand,
+  isManilha,
   otherTeam,
   seatsOfTeam,
   teamOf,
@@ -96,6 +97,17 @@ function chooseCard(state: TrucoState, seat: number, random: Random): string {
 
   if (partnerAhead && (isLast || standing.strength >= 8)) return lowest.id;
 
+  // First round tied on the table: holding a manilha, let it stay tied and
+  // keep the manilha for the second round, which then decides the hand.
+  if (
+    standing.team === 'tie' &&
+    state.rounds.length === 0 &&
+    hand.some((card) => isManilha(card, state.variantId, state.vira))
+  ) {
+    const keepsTie = hand.find((card) => strength(card) <= standing.strength);
+    return (keepsTie ?? lowest).id;
+  }
+
   if (!partnerAhead) {
     const winning = hand.find((card) => strength(card) > standing.strength);
     if (winning) return winning.id;
@@ -113,7 +125,32 @@ export function chooseBotAction(
   random: Random = Math.random,
 ): TrucoBotAction {
   if (canCallTruco(state, seat)) {
-    const score = seatScore(state, seat) + roundsOutlook(state, teamOf(seat));
+    const team = teamOf(seat);
+    const manilhas = state.hands[seat].filter((card) =>
+      isManilha(card, state.variantId, state.vira),
+    ).length;
+    const teamManilhaOnTable = state.trick.some(
+      (play) =>
+        teamOf(play.seat) === team &&
+        !play.faceDown &&
+        isManilha(play.card, state.variantId, state.vira),
+    );
+
+    // Won the first round and holds a manilha for the second: always truco.
+    if (
+      state.rounds.length === 1 &&
+      state.rounds[0] === team &&
+      (manilhas > 0 || teamManilhaOnTable)
+    ) {
+      return { type: 'truco' };
+    }
+
+    // Two manilhas in the first round: stay quiet and let the others bet.
+    if (state.rounds.length === 0 && manilhas >= 2) {
+      return { type: 'play', cardId: chooseCard(state, seat, random) };
+    }
+
+    const score = seatScore(state, seat) + roundsOutlook(state, team);
     let chance = 0.04;
 
     if (score >= 1.9) chance = 0.75;
@@ -121,7 +158,7 @@ export function chooseBotAction(
 
     if (state.rounds.length === 0) chance *= 0.6;
     // The human's partner leaves most of the betting to the human.
-    if (teamOf(seat) === 0) chance *= 0.5;
+    if (team === 0) chance *= 0.5;
 
     if (random() < chance) return { type: 'truco' };
   }

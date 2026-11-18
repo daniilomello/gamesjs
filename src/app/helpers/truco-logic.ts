@@ -37,9 +37,15 @@ export function seatsOfTeam(state: TrucoState, team: TrucoTeam): number[] {
 }
 
 export function createDeck(variantId: TrucoVariantId): TrucoCard[] {
-  return TRUCO_VARIANTS[variantId].ranks.flatMap((rank) =>
+  const { ranks, extraCards = [] } = TRUCO_VARIANTS[variantId];
+  const deck = ranks.flatMap((rank) =>
     TRUCO_SUITS.map((suit) => ({ id: `${rank}-${suit}`, rank, suit })),
   );
+  const extras = extraCards.filter(
+    (card) => !deck.some((inDeck) => inDeck.id === card.id),
+  );
+
+  return [...deck, ...extras.map((card) => ({ ...card }))];
 }
 
 export function dealHand(
@@ -389,6 +395,22 @@ export function respondTruco(
     phase: 'playing',
     speech: { seat, text: 'Desce!' },
   };
+}
+
+/** Giving up the hand on your turn: the other team takes what the hand is worth. */
+export function canFold(state: TrucoState, seat: number): boolean {
+  return state.phase === 'playing' && state.turn === seat;
+}
+
+export function foldHand(state: TrucoState, seat: number): TrucoState {
+  if (!canFold(state, seat)) return state;
+
+  return endHand(
+    { ...state, speech: { seat, text: 'Tô fora!' } },
+    otherTeam(teamOf(seat)),
+    getHandValue(state),
+    'fold',
+  );
 }
 
 /** Decision of the team that is one hand away from winning: play or give up the hand. */
