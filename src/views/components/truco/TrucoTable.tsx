@@ -21,6 +21,8 @@ type TrucoTableProps = {
   state: TrucoState;
   /** Hack: show the partner's cards. */
   peekPartner: boolean;
+  /** Hack: show every card on the table. */
+  peekAll: boolean;
 };
 
 const SEAT_CLASSES: Record<SeatPosition, string> = {
@@ -58,10 +60,10 @@ const FIXED_MANILHA_LABELS = [
   { text: '7♦', red: true },
 ];
 
-export function TrucoTable({ state, peekPartner }: TrucoTableProps) {
+export function TrucoTable({ state, peekPartner, peekAll }: TrucoTableProps) {
   const { players, variantId, vira } = state;
   const manilhaRank = getManilhaRank(variantId, vira);
-  const blind = isBlindHand(state);
+  const blind = isBlindHand(state) && !peekAll;
   const showPartnerCards =
     peekPartner ||
     (state.mode === 'decisive' && state.decisionTeam === HUMAN_TEAM);
@@ -104,7 +106,8 @@ export function TrucoTable({ state, peekPartner }: TrucoTableProps) {
       {otherSeats.map((seat) => {
         const position = seatPosition(seat, players);
         const isTurn = state.phase === 'playing' && state.turn === seat;
-        const revealed = showPartnerCards && seat % 2 === HUMAN_TEAM;
+        const revealed =
+          peekAll || (showPartnerCards && seat % 2 === HUMAN_TEAM);
 
         return (
           <div

@@ -25,6 +25,7 @@ export function Truco() {
     state,
     faceDown,
     peekPartner,
+    peekAll,
     isHumanTurn,
     canCallTruco,
     canFold,
@@ -41,7 +42,7 @@ export function Truco() {
   } = useTruco();
 
   const variant = state ? TRUCO_VARIANTS[state.variantId] : null;
-  const blind = !!state && isBlindHand(state);
+  const blind = !!state && isBlindHand(state) && !peekAll;
 
   return (
     <div className="flex">
@@ -78,7 +79,11 @@ export function Truco() {
               </div>
 
               <TrucoScoreBoard state={state} />
-              <TrucoTable state={state} peekPartner={peekPartner} />
+              <TrucoTable
+                state={state}
+                peekPartner={peekPartner}
+                peekAll={peekAll}
+              />
               <TrucoPrompt
                 state={state}
                 onRespond={onRespond}

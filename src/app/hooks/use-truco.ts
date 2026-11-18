@@ -87,13 +87,15 @@ export function useTruco() {
   const [state, setState] = useState<TrucoState | null>(null);
   const [faceDown, setFaceDown] = useState(false);
   const [peekPartner, setPeekPartner] = useState(false);
+  const [peekAll, setPeekAll] = useState(false);
 
-  // Hack: "P" shows or hides the partner's cards.
+  // Hacks: "P" shows or hides the partner's cards, "O" every card on the table.
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.ctrlKey || event.metaKey || event.altKey || event.repeat)
         return;
-      if (event.key.toLowerCase() !== 'p') return;
+      const key = event.key.toLowerCase();
+      if (key !== 'p' && key !== 'o') return;
 
       const target = event.target as HTMLElement | null;
       if (
@@ -102,7 +104,8 @@ export function useTruco() {
         return;
       }
 
-      setPeekPartner((prev) => !prev);
+      if (key === 'p') setPeekPartner((prev) => !prev);
+      else setPeekAll((prev) => !prev);
     }
 
     window.addEventListener('keydown', onKeyDown);
@@ -161,6 +164,7 @@ export function useTruco() {
     state,
     faceDown: faceDown && !!state && isHumanTurn && canPlayFaceDown(state),
     peekPartner: peekPartner && state?.players === 4,
+    peekAll,
     isHumanTurn,
     canCallTruco: !!state && canCallTruco(state, HUMAN_SEAT),
     canFold: !!state && canFold(state, HUMAN_SEAT),
