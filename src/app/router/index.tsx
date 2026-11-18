@@ -9,6 +9,7 @@ import { routes } from './routes';
 
 const { MemoryGame } = lazyLoad(() => import('@views/pages/MemoryGame'));
 const { Truco } = lazyLoad(() => import('@views/pages/Truco'));
+const { Poker } = lazyLoad(() => import('@views/pages/Poker'));
 
 export function Router() {
   return (
@@ -22,6 +23,7 @@ export function Router() {
         <Route path={routes.memory} element={<MemoryGame />} />
         <Route path={routes.hangman} element={<Hangman />} />
         <Route path={routes.truco} element={<Truco />} />
+        <Route path={routes.poker} element={<Poker />} />
       </Routes>
     </Suspense>
   );

@@ -3,6 +3,7 @@ export const routes = {
   tictactoe: '/tictactoe',
   hangman: '/hangman',
   truco: '/truco',
+  poker: '/poker',
   trivia: 'https://daniilo-trivia.netlify.app/',
   snake: 'https://danlittle-snake.netlify.app/',
   runner: 'https://danlittle-runner.netlify.app/',

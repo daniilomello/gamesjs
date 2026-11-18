@@ -1,6 +1,7 @@
 import {
   Brain,
   CircleCheck,
+  Club,
   Gamepad2,
   Hash,
   Infinity,
@@ -49,6 +50,10 @@ export function Sidebar() {
             <Link to={routes.truco} className="flex gap-1 items-center">
               <Spade className="text-pink text-sm w-4 h-4" />
               Truco
+            </Link>
+            <Link to={routes.poker} className="flex gap-1 items-center">
+              <Club className="text-pink text-sm w-4 h-4" />
+              Texas Hold&apos;em
             </Link>
             <Link to={routes.trivia} className="flex gap-1 items-center">
               <CircleCheck className="text-pink text-sm w-4 h-4" />
