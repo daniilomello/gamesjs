@@ -9,6 +9,7 @@ import {
   isHumanTurn,
   leaveTable,
   nextStreet,
+  swapHoleCard,
 } from '@app/helpers/poker-logic';
 import { HUMAN_SEAT } from '@app/helpers/poker-seats';
 import {
@@ -63,13 +64,16 @@ function getAutomaticStep(
 export function usePoker() {
   const [state, setState] = useState<PokerState | null>(null);
   const [peekAll, setPeekAll] = useState(false);
+  const [swapMode, setSwapMode] = useState(false);
 
-  // Hack: "O" shows or hides every card on the table.
+  // Hacks: "O" shows or hides every card on the table, "S" turns on trading
+  // your cards by clicking them.
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.ctrlKey || event.metaKey || event.altKey || event.repeat)
         return;
-      if (event.key.toLowerCase() !== 'o') return;
+      const key = event.key.toLowerCase();
+      if (key !== 'o' && key !== 's') return;
 
       const target = event.target as HTMLElement | null;
       if (
@@ -78,7 +82,8 @@ export function usePoker() {
         return;
       }
 
-      setPeekAll((prev) => !prev);
+      if (key === 'o') setPeekAll((prev) => !prev);
+      else setSwapMode((prev) => !prev);
     }
 
     window.addEventListener('keydown', onKeyDown);
@@ -116,6 +121,10 @@ export function usePoker() {
     if (state?.phase === 'hand-end') setState(finishHand(state));
   }
 
+  function onSwapCard(cardId: string) {
+    if (state) setState(swapHoleCard(state, HUMAN_SEAT, cardId));
+  }
+
   function onLeaveTable() {
     if (state) setState(leaveTable(state));
   }
@@ -125,6 +134,7 @@ export function usePoker() {
   return {
     state,
     peekAll,
+    swapMode,
     isHumanTurn: humanTurn,
     legal: state && humanTurn ? getLegalActions(state, HUMAN_SEAT) : null,
     startGame,
@@ -132,6 +142,7 @@ export function usePoker() {
     quitGame,
     onAction,
     onNextHand,
+    onSwapCard,
     onLeaveTable,
   };
 }

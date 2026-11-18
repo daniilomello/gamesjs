@@ -12,6 +12,7 @@ import {
 import { handsToNextLevel } from '@app/helpers/poker-logic';
 import { HUMAN_SEAT } from '@app/helpers/poker-seats';
 import { usePoker } from '@app/hooks/use-poker';
+import { cn } from '@app/utils';
 import { PokerCard } from '@views/components/poker/PokerCard';
 import { PokerControls } from '@views/components/poker/PokerControls';
 import { PokerGameOver } from '@views/components/poker/PokerGameOver';
@@ -27,12 +28,14 @@ export function Poker() {
   const {
     state,
     peekAll,
+    swapMode,
     legal,
     startGame,
     restartGame,
     quitGame,
     onAction,
     onNextHand,
+    onSwapCard,
     onLeaveTable,
   } = usePoker();
 
@@ -46,6 +49,8 @@ export function Poker() {
   const nextLevel = state ? handsToNextLevel(state) : null;
   const highlighted = state ? winningCards(state) : new Set<string>();
   const humanWon = !!state && winningSeats(state).has(HUMAN_SEAT);
+  const handOver = state?.phase === 'hand-end' || state?.phase === 'game-over';
+  const canSwap = swapMode && !!human && hasCards && !human.folded && !handOver;
 
   return (
     <div className="flex">
@@ -130,15 +135,37 @@ export function Poker() {
 
               <div className="flex min-h-[96px] flex-col items-center gap-1 xs:min-h-[112px]">
                 <div className="flex items-end justify-center gap-2 xs:gap-3">
-                  {human.hand.map((card) => (
-                    <PokerCard
-                      key={card.id}
-                      size="lg"
-                      card={card}
-                      label={cardName(card)}
-                      highlight={humanWon && highlighted.has(card.id)}
-                      dimmed={human.folded}
-                    />
+                  {human.hand.map((card, index) => (
+                    <button
+                      // Keeps the slot while the card in it changes.
+                      // eslint-disable-next-line react/no-array-index-key
+                      key={`${state.handNumber}-${index}`}
+                      type="button"
+                      disabled={!canSwap}
+                      onClick={() => onSwapCard(card.id)}
+                      title={canSwap ? 'Trocar esta carta' : undefined}
+                      className={cn(
+                        'rounded-lg outline-none transition-transform',
+                        canSwap
+                          ? 'cursor-pointer hover:-translate-y-1 focus-visible:ring-2 focus-visible:ring-pink'
+                          : 'cursor-default',
+                      )}
+                    >
+                      <motion.div
+                        key={card.id}
+                        initial={{ rotateY: 90, opacity: 0.4 }}
+                        animate={{ rotateY: 0, opacity: 1 }}
+                        transition={{ duration: 0.25 }}
+                      >
+                        <PokerCard
+                          size="lg"
+                          card={card}
+                          label={cardName(card)}
+                          highlight={humanWon && highlighted.has(card.id)}
+                          dimmed={human.folded}
+                        />
+                      </motion.div>
+                    </button>
                   ))}
                 </div>
                 {madeHand && !human.folded && (

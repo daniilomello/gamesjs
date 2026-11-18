@@ -485,3 +485,34 @@ export function finishHand(
 export function leaveTable(state: PokerState): PokerState {
   return { ...state, phase: 'game-over', place: null };
 }
+
+/**
+ * Hack: trades one of the player's hole cards for a random card still in the
+ * deck. The old card goes back to the deck, so it can still show up later.
+ */
+export function swapHoleCard(
+  state: PokerState,
+  seat: number,
+  cardId: string,
+  random: Random = Math.random,
+): PokerState {
+  const player = state.players[seat];
+  const index = player.hand.findIndex((card) => card.id === cardId);
+  const handOver = state.phase === 'hand-end' || state.phase === 'game-over';
+  if (handOver || index < 0 || !isInHand(player) || !state.deck.length) {
+    return state;
+  }
+
+  const deck = [...state.deck];
+  const deckIndex = Math.floor(random() * deck.length);
+  const hand = [...player.hand];
+  [hand[index], deck[deckIndex]] = [deck[deckIndex], hand[index]];
+
+  return {
+    ...state,
+    deck,
+    players: state.players.map((current) =>
+      current.seat === seat ? { ...current, hand } : current,
+    ),
+  };
+}
